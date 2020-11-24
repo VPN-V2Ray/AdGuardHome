@@ -67,6 +67,9 @@ type homeContext struct {
 
 	ipDetector *ipDetector
 
+	// mux is our custom http.ServeMux.
+	mux *http.ServeMux
+
 	// Runtime properties
 	// --
 
@@ -187,6 +190,8 @@ func setupContext(args options) {
 			os.Exit(0)
 		}
 	}
+
+	Context.mux = http.DefaultServeMux // http.NewServeMux()
 }
 
 func setupConfig(args options) {

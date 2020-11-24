@@ -66,12 +66,12 @@ func CreateWeb(conf *WebConfig) *Web {
 	box := packr.NewBox("../../build/static")
 
 	// if not configured, redirect / to /install.html, otherwise redirect /install.html to /
-	http.Handle("/", postInstallHandler(optionalAuthHandler(gziphandler.GzipHandler(http.FileServer(box)))))
+	Context.mux.Handle("/", postInstallHandler(optionalAuthHandler(gziphandler.GzipHandler(http.FileServer(box)))))
 
 	// add handlers for /install paths, we only need them when we're not configured yet
 	if conf.firstRun {
 		log.Info("This is the first launch of AdGuard Home, redirecting everything to /install.html ")
-		http.Handle("/install.html", preInstallHandler(http.FileServer(box)))
+		Context.mux.Handle("/install.html", preInstallHandler(http.FileServer(box)))
 		w.registerInstallHandlers()
 	} else {
 		registerControlHandlers()
@@ -141,7 +141,7 @@ func (web *Web) Start() {
 		web.httpServer = &http.Server{
 			ErrorLog: web.errLogger,
 			Addr:     address,
-			Handler:  withMiddlewares(http.DefaultServeMux, filterPProf, limitRequestBody),
+			Handler:  withMiddlewares(Context.mux, limitRequestBody),
 		}
 		err := web.httpServer.ListenAndServe()
 		if err != http.ErrServerClosed {
@@ -198,6 +198,7 @@ func (web *Web) tlsServerLoop() {
 				RootCAs:      Context.tlsRoots,
 				CipherSuites: Context.tlsCiphers,
 			},
+			Handler: Context.mux,
 		}
 
 		printHTTPAddresses("https")
