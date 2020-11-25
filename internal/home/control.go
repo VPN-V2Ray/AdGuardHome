@@ -112,8 +112,8 @@ func registerControlHandlers() {
 	httpRegister(http.MethodGet, "/control/profile", handleGetProfile)
 
 	// No auth is necessary for DOH/DOT configurations
-	http.HandleFunc("/apple/doh.mobileconfig", postInstall(handleMobileConfigDoh))
-	http.HandleFunc("/apple/dot.mobileconfig", postInstall(handleMobileConfigDot))
+	http.HandleFunc("/apple/doh.mobileconfig", postInstall(handleMobileConfigDOH))
+	http.HandleFunc("/apple/dot.mobileconfig", postInstall(handleMobileConfigDOT))
 	RegisterAuthHandlers()
 }
 
