@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/AdguardTeam/AdGuardHome/internal/util"
 	"github.com/AdguardTeam/golibs/log"
@@ -15,11 +16,37 @@ import (
 	"github.com/gobuffalo/packr"
 )
 
+const (
+	// ReadTimeout is the maximum duration for reading the entire request,
+	// including the body.
+	ReadTimeout = 10 * time.Second
+
+	// ReadHeaderTimeout is the amount of time allowed to read request
+	// headers.
+	ReadHeaderTimeout = 10 * time.Second
+
+	// WriteTimeout is the maximum duration before timing out writes of the
+	// response.
+	WriteTimeout = 10 * time.Second
+)
+
 type WebConfig struct {
 	firstRun  bool
 	BindHost  string
 	BindPort  int
 	PortHTTPS int
+
+	// ReadTimeout is an option to pass to http.Server for setting an
+	// appropriate field.
+	ReadTimeout time.Duration
+
+	// ReadHeaderTimeout is an option to pass to http.Server for setting an
+	// appropriate field.
+	ReadHeaderTimeout time.Duration
+
+	// WriteTimeout is an option to pass to http.Server for setting an
+	// appropriate field.
+	WriteTimeout time.Duration
 }
 
 // HTTPSServer - HTTPS Server
@@ -139,9 +166,12 @@ func (web *Web) Start() {
 		// we need to have new instance, because after Shutdown() the Server is not usable
 		address := net.JoinHostPort(web.conf.BindHost, strconv.Itoa(web.conf.BindPort))
 		web.httpServer = &http.Server{
-			ErrorLog: web.errLogger,
-			Addr:     address,
-			Handler:  withMiddlewares(Context.mux, limitRequestBody),
+			ErrorLog:          web.errLogger,
+			Addr:              address,
+			Handler:           withMiddlewares(Context.mux, limitRequestBody),
+			ReadTimeout:       web.conf.ReadTimeout,
+			ReadHeaderTimeout: web.conf.ReadHeaderTimeout,
+			WriteTimeout:      web.conf.WriteTimeout,
 		}
 		err := web.httpServer.ListenAndServe()
 		if err != http.ErrServerClosed {
@@ -198,7 +228,10 @@ func (web *Web) tlsServerLoop() {
 				RootCAs:      Context.tlsRoots,
 				CipherSuites: Context.tlsCiphers,
 			},
-			Handler: Context.mux,
+			Handler:           Context.mux,
+			ReadTimeout:       web.conf.ReadTimeout,
+			ReadHeaderTimeout: web.conf.ReadHeaderTimeout,
+			WriteTimeout:      web.conf.WriteTimeout,
 		}
 
 		printHTTPAddresses("https")

@@ -191,7 +191,7 @@ func setupContext(args options) {
 		}
 	}
 
-	Context.mux = http.DefaultServeMux // http.NewServeMux()
+	Context.mux = http.NewServeMux()
 }
 
 func setupConfig(args options) {
@@ -311,6 +311,10 @@ func run(args options) {
 		firstRun: Context.firstRun,
 		BindHost: config.BindHost,
 		BindPort: config.BindPort,
+
+		ReadTimeout:       ReadTimeout,
+		ReadHeaderTimeout: ReadHeaderTimeout,
+		WriteTimeout:      WriteTimeout,
 	}
 	Context.web = CreateWeb(&webConf)
 	if Context.web == nil {
