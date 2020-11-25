@@ -17,10 +17,12 @@ and this project adheres to
 
 ### Changed
 
+- Improved HTTP requests handling and timeouts. ([#2343]).
 - Various internal improvements ([#2271], [#2297]).
 
 [#2271]: https://github.com/AdguardTeam/AdGuardHome/issues/2271
 [#2297]: https://github.com/AdguardTeam/AdGuardHome/issues/2297
+[#2343]: https://github.com/AdguardTeam/AdGuardHome/issues/2343
 
 
 
